@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "set NODE_ENV=development && nodemon index",
+    "start": "node index",
     "test": "set NODE_ENV=test && mocha --recursive --exit"
   },
   "keywords": [],
