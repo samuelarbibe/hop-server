@@ -17,7 +17,7 @@ describe('Products', () => {
 
     it('Should return all products', (done) => {
       request(app)
-        .get('/products')
+        .get('/api/products')
         .end((err, res) => {
           expect(err).to.be.null
           expect(res).to.have.status(200)
@@ -31,7 +31,7 @@ describe('Products', () => {
     it('Should add product', async () => {
       const productToAdd = products[0]
       const res = await request(app)
-        .post('/products')
+        .post('/api/products')
         .send(productToAdd)
 
       expect(res).to.have.status(201)

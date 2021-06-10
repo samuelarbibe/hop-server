@@ -13,7 +13,7 @@ describe('Cart', () => {
   describe('GET /', () => {
     it('Should return cart', (done) => {
       request(app)
-        .get('/cart')
+        .get('/api/cart')
         .end((err, res) => {
           expect(err).to.be.null
           expect(res).to.have.status(200)
@@ -35,7 +35,7 @@ describe('Cart', () => {
       const amount = product.stock - 1
 
       const res = await request(app)
-        .put(`/cart/${product._id.toString()}?amount=${amount}`)
+        .put(`/api/cart/${product._id.toString()}?amount=${amount}`)
       expect(res).to.have.status(200)
       expect(res.body.items[0].productId).to.equal(product._id.toString())
       expect(res.body.items[0].amount).to.equal(amount)
@@ -49,7 +49,7 @@ describe('Cart', () => {
       const amount = product.stock + 1
 
       const res = await request(app)
-        .put(`/cart/${product._id.toString()}?amount=${amount}`)
+        .put(`/api/cart/${product._id.toString()}?amount=${amount}`)
       expect(res).to.have.status(409)
 
       const addedProduct = await Product.findById(product._id)
@@ -66,7 +66,7 @@ describe('Cart', () => {
 
       const productInCart = insertedProducts[0]
       const amountInCart = productInCart.stock
-      await request(app).put(`/cart/${productInCart._id.toString()}?amount=${amountInCart}`)
+      await request(app).put(`/api/cart/${productInCart._id.toString()}?amount=${amountInCart}`)
     })
 
     it('Should remove item from cart and restock', async () => {
@@ -74,7 +74,7 @@ describe('Cart', () => {
       const amountToRemove = product.stock - 1
 
       const res = await request(app)
-        .delete(`/cart/${product._id.toString()}?amount=${amountToRemove}`)
+        .delete(`/api/cart/${product._id.toString()}?amount=${amountToRemove}`)
 
       expect(res).to.have.status(200)
       expect(res.body.items[0].productId).to.equal(product._id.toString())
@@ -89,7 +89,7 @@ describe('Cart', () => {
       const amountToRemove = product.stock
 
       const res = await request(app)
-        .delete(`/cart/${product._id.toString()}?amount=${amountToRemove}`)
+        .delete(`/api/cart/${product._id.toString()}?amount=${amountToRemove}`)
 
       expect(res).to.have.status(200)
       expect(res.body.items.length).to.equal(0)
@@ -106,14 +106,14 @@ describe('Cart', () => {
 
       const promises = insertedProducts.map((product) => {
         const amountInCart = product.stock
-        return request(app).put(`/cart/${product._id.toString()}?amount=${amountInCart}`)
+        return request(app).put(`/api/cart/${product._id.toString()}?amount=${amountInCart}`)
       })
 
       await Promise.all(promises)
     })
 
     it('Should empty cart form all items and restock them', async () => {
-      const res = await request(app).delete('/cart')
+      const res = await request(app).delete('/api/cart')
 
       expect(res).to.have.status(200)
       expect(res.body.items.length).to.equal(0)
