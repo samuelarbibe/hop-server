@@ -88,6 +88,9 @@ const emptyCart = async (cartId) => {
 
   const updatedCarts = await Promise.all(removePromises)
   const lastUpdatedCart = updatedCarts[updatedCarts.length - 1]
+
+  await Cart.findByIdAndDelete(cartId)
+
   return lastUpdatedCart
 }
 

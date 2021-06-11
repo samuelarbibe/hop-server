@@ -17,11 +17,13 @@ const productSchema = new Schema({
 })
 
 const csvFormat = {
-  headers: 'Name Price Stock',
+  headers: 'Name Price Stock TempStock description',
   constraints: {
     'Name': 'name',
     'Price': 'price',
     'Stock': 'stock',
+    'TempStock': 'tempStock',
+    'Description': 'description',
   },
 }
 
