@@ -14,13 +14,9 @@ const addItem = async (cartId, productId, amount) => {
     throw createHttpError(404, `No Product with ID: ${productId}`)
   }
 
-  const productToAdd = await Product.findById(productId)
-
-  if (productToAdd.tempStock < amount) {
-    throw createHttpError(409, `Not enough in stock: ${productId}, ${amount}/${productToAdd.tempStock}`)
+  if (product.tempStock < amount) {
+    throw createHttpError(409, `Not enough in stock: ${productId}, ${amount}/${product.tempStock}`)
   }
-
-  await Product.findByIdAndUpdate(productId, { $inc: { tempStock: amount * -1 } })
 
   let itemExistsInCart = false
   const updatedItems = cart.items.map((item) => {
@@ -40,6 +36,8 @@ const addItem = async (cartId, productId, amount) => {
   }
 
   const updatedCart = await Cart.findByIdAndUpdate(cartId, { $set: { items: updatedItems } })
+  await Product.findByIdAndUpdate(productId, { $inc: { tempStock: amount * -1 } })
+
   return updatedCart
 }
 
@@ -70,9 +68,9 @@ const removeItem = async (cartId, productId, amount) => {
     })
   }
 
+  const updatedCart = await Cart.findByIdAndUpdate(cart._id, { $set: { items: updatedItems } })
   await Product.findByIdAndUpdate(productId, { $inc: { tempStock: amount } })
 
-  const updatedCart = await Cart.findByIdAndUpdate(cart._id, { $set: { items: updatedItems } })
   return updatedCart
 }
 
