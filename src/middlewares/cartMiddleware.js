@@ -9,8 +9,7 @@ const cartMiddleware = async (req, res, next) => {
     const cart = await Cart.findById(fingerprint)
 
     if (!cart) {
-      const newCart = new Cart({ _id: fingerprint, items: [] })
-      await newCart.save()
+      await Cart.create({ _id: fingerprint, items: [] })
     }
   } catch (error) {
     logger.error(error.message)

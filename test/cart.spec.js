@@ -3,6 +3,7 @@ const chaiHttp = require('chai-http')
 chai.use(chaiHttp)
 const { request, expect } = chai
 
+const Cart = require('../src/models/Cart')
 const Product = require('../src/models/Product')
 const { createServer } = require('../src/server')
 const app = createServer(true)
@@ -122,6 +123,70 @@ describe('Cart', () => {
       products.forEach((product) => {
         expect(product.tempStock).to.equal(product.stock)
       })
+    })
+  })
+
+  describe('Stress test', () => {
+    let insertedProduct
+    beforeEach(async () => {
+      await Product.deleteMany()
+      await Cart.deleteMany()
+      const productToInsert = { ...products[0], tempStock: 1000 }
+      insertedProduct = await Product.create(productToInsert)
+    })
+
+    it('Use up all stock', async () => {
+      const requestPromises = []
+
+      for (let i = 0; i < 100; i++) {
+        const agent = request.agent(app)
+        await agent.get('/api/cart')
+        const amount = Math.round(Math.random() * 10)
+
+        requestPromises.push(agent.put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`))
+      }
+
+      await Promise.allSettled(requestPromises)
+
+      const product = await Product.findById(insertedProduct._id)
+      const { body: cart } = await request(app).get('/api/cart')
+      expect(product.tempStock).to.equal(insertedProduct.tempStock - cart.items[0].amount)
+    })
+
+    it('Should return all tempStock to original state', async () => {
+      const requestPromises = []
+
+      for (let i = 0; i < 100; i++) {
+        const agent = request.agent(app)
+        await agent.get('/api/cart')
+        const amount = Math.round(Math.random() * 10)
+
+        requestPromises.push(agent.put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)
+          .then(() => agent.delete(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)))
+      }
+
+      await Promise.allSettled(requestPromises)
+
+      const product = await Product.findById(insertedProduct._id)
+      expect(product.tempStock).to.equal(insertedProduct.tempStock)
+    })
+
+    it('Should not add more to carts then in stock', async () => {
+      const requestPromises = []
+
+      for (let i = 0; i < 100; i++) {
+        const agent = request.agent(app)
+        await agent.get('/api/cart')
+        const amount = Math.round(Math.random() * 10)
+
+        requestPromises.push(agent.put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`))
+      }
+
+      await Promise.allSettled(requestPromises)
+
+      const product = await Product.findById(insertedProduct._id)
+      const productAmountInCart = await Cart.find({}).then((carts) => carts[0].items[0].amount)
+      expect(product.tempStock + productAmountInCart).to.equal(insertedProduct.tempStock)
     })
   })
 })

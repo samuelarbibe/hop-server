@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb')
 const createHttpError = require('http-errors')
 const mongoose = require('mongoose')
 const Product = require('./Product')
@@ -20,7 +21,7 @@ const addItem = async (cartId, productId, amount) => {
 
   let itemExistsInCart = false
   const updatedItems = cart.items.map((item) => {
-    if (item.productId.toString() === productId) {
+    if (item.productId === productId) {
       itemExistsInCart = true
       const updatedAmount = item.amount + amount
       return { productId, amount: updatedAmount }
@@ -35,8 +36,12 @@ const addItem = async (cartId, productId, amount) => {
     })
   }
 
+  const updatedProduct = await Product.findOneAndUpdate({ _id: ObjectId(productId), tempStock: { $gte: amount } }, { $inc: { tempStock: -amount } })
+  if (!updatedProduct) {
+    throw createHttpError(409, `Could not add item to cart: ${productId}`)
+  }
+
   const updatedCart = await Cart.findByIdAndUpdate(cartId, { $set: { items: updatedItems } })
-  await Product.findByIdAndUpdate(productId, { $inc: { tempStock: amount * -1 } })
 
   return updatedCart
 }
@@ -52,15 +57,15 @@ const removeItem = async (cartId, productId, amount) => {
     throw createHttpError(404, `No Product with ID: ${productId}`)
   }
 
-  if (!cart.items.find((item) => item.productId.toString() === productId)) {
+  if (!cart.items.find((item) => item.productId === productId)) {
     throw createHttpError(404, `No item of product ${productId} in cart ${cart._id.toString()}`)
   }
 
-  let updatedItems = cart.items.filter((item) => item.productId.toString() === productId ? item.amount > amount : true)
+  let updatedItems = cart.items.filter((item) => item.productId === productId ? item.amount > amount : true)
 
   if (updatedItems.length === cart.items.length) {
     updatedItems = cart.items.map((item) => {
-      if (item.productId.toString() === productId) {
+      if (item.productId === productId) {
         const updatedAmount = item.amount - amount
         return { productId, amount: updatedAmount }
       }
@@ -68,8 +73,12 @@ const removeItem = async (cartId, productId, amount) => {
     })
   }
 
+  const updatedProduct = await Product.findOneAndUpdate({ _id: ObjectId(productId) }, { $inc: { tempStock: amount } })
+  if (!updatedProduct) {
+    throw createHttpError(500, `Could not remove item from cart: ${productId}`)
+  }
+
   const updatedCart = await Cart.findByIdAndUpdate(cart._id, { $set: { items: updatedItems } })
-  await Product.findByIdAndUpdate(productId, { $inc: { tempStock: amount } })
 
   return updatedCart
 }
@@ -96,7 +105,7 @@ const cartSchema = new Schema({
   _id: String,
   items: [{
     _id: false,
-    productId: Schema.ObjectId,
+    productId: String,
     amount: Number,
   }],
   createdAt: {

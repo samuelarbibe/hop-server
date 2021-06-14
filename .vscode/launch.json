@@ -13,6 +13,26 @@
       ],
       "type": "pwa-node",
       "outputCapture": "std",
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Mocha Tests",
+      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "args": [
+        "--recursive",
+        "--exit",
+        "--colors",
+        "--timeout",
+        "10000"
+      ],
+      "env": {
+        "NODE_ENV": "test"
+      },
+      "internalConsoleOptions": "openOnSessionStart",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
     }
   ]
 }

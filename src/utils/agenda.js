@@ -23,7 +23,6 @@ const init = async (dbInstance) => {
       if (expiredCarts.length) {
         const clearPromises = expiredCarts.map(async (cart) => {
           await Cart.empty(cart._id)
-          await Cart.findByIdAndDelete(cart._id)
         })
 
         await Promise.all(clearPromises)
