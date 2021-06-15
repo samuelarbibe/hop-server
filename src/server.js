@@ -15,7 +15,7 @@ const PORT = process.env.PORT
 const mongoURI = process.env.MONGO_URI
 
 const connectDb = async (uri) => {
-  await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+  await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false })
   mongoose.set('useFindAndModify', false)
   mongoose.set('returnOriginal', false)
 }

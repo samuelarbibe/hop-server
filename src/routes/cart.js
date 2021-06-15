@@ -7,8 +7,8 @@ const Cart = require('../models/Cart')
 
 const getCart = async (req, res, next) => {
   try {
-    const fingerprint = req.fingerprint.hash
-    const cart = await Cart.findById(fingerprint)
+    const cartId = req.fingerprint.hash
+    const cart = await Cart.findById(cartId)
     res.json(cart)
   } catch (error) {
     if (createHttpError.isHttpError(error)) return next(error)
@@ -19,11 +19,11 @@ const getCart = async (req, res, next) => {
 
 const addProduct = async (req, res, next) => {
   try {
-    const fingerprint = req.fingerprint.hash
+    const cartId = req.fingerprint.hash
     const productId = req.params.id
     const amount = Number(req.query.amount || 1)
 
-    const updatedCart = await Cart.addItem(fingerprint, productId, amount)
+    const updatedCart = await Cart.addItem(cartId, productId, amount)
     res.json(updatedCart)
   } catch (error) {
     if (createHttpError.isHttpError(error)) return next(error)
@@ -34,11 +34,11 @@ const addProduct = async (req, res, next) => {
 
 const removeProduct = async (req, res, next) => {
   try {
-    const fingerprint = req.fingerprint.hash
+    const cartId = req.fingerprint.hash
     const productId = req.params.id
     const amount = Number(req.query.amount || 1)
 
-    const updatedCart = await Cart.removeItem(fingerprint, productId, amount)
+    const updatedCart = await Cart.removeItem(cartId, productId, amount)
     res.json(updatedCart)
   } catch (error) {
     if (createHttpError.isHttpError(error)) return next(error)
@@ -49,9 +49,8 @@ const removeProduct = async (req, res, next) => {
 
 const emptyCart = async (req, res, next) => {
   try {
-    const fingerprint = req.fingerprint.hash
-
-    const updatedCart = await Cart.empty(fingerprint)
+    const cartId = req.fingerprint.hash
+    const updatedCart = await Cart.empty(cartId)
     res.json(updatedCart)
   } catch (error) {
     if (createHttpError.isHttpError(error)) return next(error)

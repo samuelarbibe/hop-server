@@ -139,30 +139,42 @@ describe('Cart', () => {
       const requestPromises = []
 
       for (let i = 0; i < 100; i++) {
-        const agent = request.agent(app)
-        await agent.get('/api/cart')
         const amount = Math.round(Math.random() * 10)
+        const fakeFingerprint = `mock-fingerprint-${i}`
+        await request(app).get('/api/cart').send({ cartId: fakeFingerprint })
 
-        requestPromises.push(agent.put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`))
+        requestPromises.push(
+          request(app)
+            .put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)
+            .send({ cartId: fakeFingerprint })
+        )
       }
 
       await Promise.allSettled(requestPromises)
 
       const product = await Product.findById(insertedProduct._id)
-      const { body: cart } = await request(app).get('/api/cart')
-      expect(product.tempStock).to.equal(insertedProduct.tempStock - cart.items[0].amount)
+      const productAmountInCarts = await Cart.find({}).then((carts) => carts.reduce((acc, curr) => {
+        return curr.items.length ? acc + curr.items[0].amount : acc
+      }, 0))
+      expect(product.tempStock).to.equal(insertedProduct.tempStock - productAmountInCarts)
     })
 
-    it('Should return all tempStock to original state', async () => {
+    it('Use and delete all stock', async () => {
       const requestPromises = []
 
       for (let i = 0; i < 100; i++) {
-        const agent = request.agent(app)
-        await agent.get('/api/cart')
         const amount = Math.round(Math.random() * 10)
+        const fakeFingerprint = `mock-fingerprint-${i}`
+        await request(app).get('/api/cart').send({ cartId: fakeFingerprint })
 
-        requestPromises.push(agent.put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)
-          .then(() => agent.delete(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)))
+        requestPromises.push(
+          request(app)
+            .put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)
+            .send({ cartId: fakeFingerprint })
+            .then(() => request(app)
+              .delete(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)
+              .send({ cartId: fakeFingerprint }))
+        )
       }
 
       await Promise.allSettled(requestPromises)
@@ -171,22 +183,53 @@ describe('Cart', () => {
       expect(product.tempStock).to.equal(insertedProduct.tempStock)
     })
 
-    it('Should not add more to carts then in stock', async () => {
+    it('Try to use more stock then available', async () => {
       const requestPromises = []
 
       for (let i = 0; i < 100; i++) {
-        const agent = request.agent(app)
-        await agent.get('/api/cart')
         const amount = Math.round(Math.random() * 10)
+        const fakeFingerprint = `mock-fingerprint-${i}`
+        await request(app).get('/api/cart').send({ cartId: fakeFingerprint })
 
-        requestPromises.push(agent.put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`))
+        requestPromises.push(request(app).put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`).send({ cartId: fakeFingerprint }))
       }
 
       await Promise.allSettled(requestPromises)
 
       const product = await Product.findById(insertedProduct._id)
-      const productAmountInCart = await Cart.find({}).then((carts) => carts[0].items[0].amount)
-      expect(product.tempStock + productAmountInCart).to.equal(insertedProduct.tempStock)
+      const productAmountInCarts = await Cart.find({}).then((carts) => carts.reduce((acc, curr) => {
+        return curr.items.length ? acc + curr.items[0].amount : acc
+      }, 0))
+      expect(product.tempStock).to.equal(insertedProduct.tempStock - productAmountInCarts)
+    })
+
+    it('Try to delete and use more stock then available', async () => {
+      const requestPromises = []
+
+      for (let i = 0; i < 100; i++) {
+        const amount = Math.round(Math.random() * 10)
+        const fakeFingerprint = `mock-fingerprint-${i}`
+        await request(app).get('/api/cart').send({ cartId: fakeFingerprint })
+
+        requestPromises.push(
+          request(app)
+            .put(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)
+            .send({ cartId: fakeFingerprint })
+        )
+        requestPromises.push(
+          request(app)
+            .delete(`/api/cart/${insertedProduct._id.toString()}?amount=${amount}`)
+            .send({ cartId: fakeFingerprint })
+        )
+      }
+
+      await Promise.all(requestPromises)
+
+      const product = await Product.findById(insertedProduct._id)
+      const productAmountInCarts = await Cart.find({}).then((carts) => carts.reduce((acc, curr) => {
+        return curr.items.length ? acc + curr.items[0].amount : acc
+      }, 0))
+      expect(product.tempStock).to.equal(insertedProduct.tempStock - productAmountInCarts)
     })
   })
 })

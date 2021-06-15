@@ -90,7 +90,7 @@ const emptyCart = async (cartId) => {
   }
 
   const removePromises = cart.items.map(async (item) => {
-    return removeItem(cartId, item.productId.toString(), item.amount)
+    return removeItem(cartId, item.productId, item.amount)
   })
 
   const updatedCarts = await Promise.all(removePromises)
