@@ -1,7 +1,7 @@
-const createHttpError = require("http-errors")
-const logger = require("../utils/logger")
+const createHttpError = require('http-errors')
+const logger = require('../utils/logger')
 
-const Cart = require("../models/Cart")
+const Cart = require('../models/Cart')
 
 const cartMiddleware = async (req, res, next) => {
   try {

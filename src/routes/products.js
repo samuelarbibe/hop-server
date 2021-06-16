@@ -43,8 +43,8 @@ const addProduct = async (req, res, next) => {
 const getProductsAsCsv = async (req, res, next) => {
   try {
     const query = req.body || {}
-    res.setHeader("content-type", "text/csv")
-    res.setHeader("Content-Disposition", "attachmentfilename=products.csv")
+    res.setHeader('content-type', 'text/csv')
+    res.setHeader('Content-Disposition', 'attachmentfilename=products.csv')
 
     Product.findAndStreamCsv(query).pipe(res)
   } catch (error) {
