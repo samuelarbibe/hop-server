@@ -1,9 +1,9 @@
 const products = [
   {
-    "name": "Penne arabiata",
-    "price": 32,
-    "stock": 20,
-    "tempStock": 20,
+    name: "Penne arabiata",
+    price: 32,
+    stock: 20,
+    tempStock: 20,
   },
 ]
 
