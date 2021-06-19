@@ -8,6 +8,7 @@ const errorHandler = require('./middlewares/errorHandler')
 const cartMiddleware = require('./middlewares/cartMiddleware')
 const morganMiddleware = require('./middlewares/morganMiddleware')
 const fingerprintMiddleware = require('./middlewares/fingerprintMiddleware')
+const passportMiddleware = require('./middlewares/passportMiddleware')
 
 const routes = require('./routes/index')
 
@@ -30,6 +31,7 @@ const createServer = () => {
   if (process.env.NODE_ENV !== 'test') app.use(morganMiddleware)
   app.use(fingerprintMiddleware)
   app.use(cartMiddleware)
+  app.use(passportMiddleware())
 
   app.use('/api', routes)
 
