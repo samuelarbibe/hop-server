@@ -5,6 +5,7 @@ const logger = require('../utils/logger')
 
 const Cart = require('../models/Cart')
 const { addItem, removeItem, emptyCart, setShippingMethod, clearShippingMethod } = require('../utils/cart')
+const { isAuth } = require('../middlewares/authMiddleware')
 
 const getCartHandler = async (req, res, next) => {
   try {
@@ -15,6 +16,18 @@ const getCartHandler = async (req, res, next) => {
     if (createHttpError.isHttpError(error)) return next(error)
     logger.error(error.message)
     return next(createHttpError(500, 'Could not load cart'))
+  }
+}
+
+const getAllCartsHandler = async (req, res, next) => {
+  try {
+    const cartId = req.fingerprint.hash
+    const carts = await Cart.find({ _id: { $ne: cartId } })
+    res.json(carts)
+  } catch (error) {
+    if (createHttpError.isHttpError(error)) return next(error)
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not load carts'))
   }
 }
 
@@ -87,9 +100,9 @@ const emptyCartHandler = async (req, res, next) => {
   }
 }
 
-
 const cartRoutes = express.Router()
 cartRoutes.get('/', getCartHandler)
+cartRoutes.get('/all', isAuth, getAllCartsHandler)
 cartRoutes.put('/product/:id', addProductHandler)
 cartRoutes.delete('/product/:id', removeProductHandler)
 cartRoutes.put('/shippingMethod/:id', setShippingMethodHandler)

@@ -1,5 +1,6 @@
 const express = require('express')
 const createHttpError = require('http-errors')
+const { isAuth } = require('../middlewares/authMiddleware')
 const Product = require('../models/Product')
 const logger = require('../utils/logger')
 
@@ -10,6 +11,27 @@ const getAllProducts = async (req, res, next) => {
   } catch (error) {
     logger.error(error.message)
     return next(createHttpError(500, 'Could not load products'))
+  }
+}
+
+const updateProduct = async (req, res, next) => {
+  try {
+    const { _id, ...productToUpdate } = req.body
+    const updatedProduct = await Product.findByIdAndUpdate(_id, productToUpdate)
+    res.json(updatedProduct)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not update product'))
+  }
+}
+
+const addProduct = async (req, res, next) => {
+  try {
+    const newProduct = await Product.create(req.body)
+    res.status(201).json(newProduct)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not add product'))
   }
 }
 
@@ -25,18 +47,6 @@ const getProductById = async (req, res, next) => {
   } catch (error) {
     logger.error(error.message)
     return next(createHttpError(500, 'Could not load products'))
-  }
-}
-
-const addProduct = async (req, res, next) => {
-  try {
-    const productData = req.body
-    const productToAdd = new Product(productData)
-    const newProduct = await productToAdd.save()
-    res.status(201).json(newProduct)
-  } catch (error) {
-    logger.error(error.message)
-    return next(createHttpError(500, 'Could not save product'))
   }
 }
 
@@ -68,9 +78,10 @@ const addProductsFromCsv = async (req, res, next) => {
 
 const productRoutes = express.Router()
 productRoutes.get('/', getAllProducts)
+productRoutes.put('/', isAuth, updateProduct)
+productRoutes.post('/', isAuth, addProduct)
 productRoutes.get('/:id', getProductById)
-productRoutes.post('/', addProduct)
 productRoutes.get('/csv', getProductsAsCsv)
-productRoutes.post('/csv', addProductsFromCsv)
+productRoutes.post('/csv', isAuth, addProductsFromCsv)
 
 module.exports = productRoutes

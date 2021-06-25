@@ -1,5 +1,6 @@
 const express = require('express')
 const createHttpError = require('http-errors')
+const { isAuth } = require('../middlewares/authMiddleware')
 const ShippingMethod = require('../models/ShippingMethod')
 const logger = require('../utils/logger')
 
@@ -28,10 +29,20 @@ const getShippingMethodById = async (req, res, next) => {
   }
 }
 
+const updateShippingMethod = async (req, res, next) => {
+  try {
+    const { _id, ...shippingMethodToUpdate } = req.body
+    const updatedShippingMethod = await ShippingMethod.findByIdAndUpdate(_id, shippingMethodToUpdate)
+    res.json(updatedShippingMethod)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not update shipping method'))
+  }
+}
+
 const addShippingMethod = async (req, res, next) => {
   try {
     const newShippingMethod = await ShippingMethod.create(req.body)
-
     res.status(201).json(newShippingMethod)
   } catch (error) {
     logger.error(error.message)
@@ -42,6 +53,7 @@ const addShippingMethod = async (req, res, next) => {
 const shippingMethodRoutes = express.Router()
 shippingMethodRoutes.get('/', getAllShippingMethods)
 shippingMethodRoutes.get('/:id', getShippingMethodById)
-shippingMethodRoutes.post('/', addShippingMethod)
+shippingMethodRoutes.put('/', isAuth, updateShippingMethod)
+shippingMethodRoutes.post('/', isAuth, addShippingMethod)
 
 module.exports = shippingMethodRoutes

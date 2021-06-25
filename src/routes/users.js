@@ -2,7 +2,8 @@ const express = require('express')
 const passport = require('passport')
 
 const userRoutes = express.Router()
-userRoutes.post('/login', (req, res, next) => {
+
+const loginHandler = (req, res, next) => {
   passport.authenticate('local',
     (err, user) => {
       if (err) {
@@ -21,6 +22,13 @@ userRoutes.post('/login', (req, res, next) => {
         return res.json({ authenticated: true })
       })
     })(req, res, next)
-})
+}
+
+const isLoggedInHandler = (req, res) => {
+  res.send({ authenticated: !!req.user })
+}
+
+userRoutes.get('/login', isLoggedInHandler)
+userRoutes.post('/login', loginHandler)
 
 module.exports = userRoutes
