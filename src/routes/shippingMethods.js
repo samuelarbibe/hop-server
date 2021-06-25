@@ -33,6 +33,10 @@ const updateShippingMethod = async (req, res, next) => {
   try {
     const { _id, ...shippingMethodToUpdate } = req.body
     const updatedShippingMethod = await ShippingMethod.findByIdAndUpdate(_id, shippingMethodToUpdate)
+    if (!updatedShippingMethod) {
+      res.next(createHttpError(404, `No Shipping method with ID: ${_id}`))
+    }
+
     res.json(updatedShippingMethod)
   } catch (error) {
     logger.error(error.message)

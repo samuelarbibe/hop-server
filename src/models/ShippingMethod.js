@@ -7,6 +7,7 @@ const ShippingMethodSchema = new Schema({
   type: String,
   price: Number,
   stock: Number,
+  freeAbove: Number,
   tempStock: {
     type: Number,
     default: () => this.stock,

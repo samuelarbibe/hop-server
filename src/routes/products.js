@@ -18,6 +18,10 @@ const updateProduct = async (req, res, next) => {
   try {
     const { _id, ...productToUpdate } = req.body
     const updatedProduct = await Product.findByIdAndUpdate(_id, productToUpdate)
+    if (!updatedProduct) {
+      res.next(createHttpError(404, `No Product with ID: ${_id}`))
+    }
+
     res.json(updatedProduct)
   } catch (error) {
     logger.error(error.message)
