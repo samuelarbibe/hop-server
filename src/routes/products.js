@@ -39,6 +39,21 @@ const addProduct = async (req, res, next) => {
   }
 }
 
+const deleteProduct = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const deletedProduct = await Product.findByIdAndDelete(id)
+    if (!deletedProduct) {
+      res.next(createHttpError(404, `No Product with ID: ${id}`))
+    }
+
+    res.json(deletedProduct)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not add product'))
+  }
+}
+
 const getProductById = async (req, res, next) => {
   try {
     const id = req.params.id
@@ -84,6 +99,7 @@ const productRoutes = express.Router()
 productRoutes.get('/', getAllProducts)
 productRoutes.put('/', isAuth, updateProduct)
 productRoutes.post('/', isAuth, addProduct)
+productRoutes.delete('/:id', isAuth, deleteProduct)
 productRoutes.get('/:id', getProductById)
 productRoutes.get('/csv', getProductsAsCsv)
 productRoutes.post('/csv', isAuth, addProductsFromCsv)
