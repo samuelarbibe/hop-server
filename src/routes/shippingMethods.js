@@ -54,10 +54,26 @@ const addShippingMethod = async (req, res, next) => {
   }
 }
 
+const deleteShippingMethod = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const deletedShippingMethod = await ShippingMethod.findByIdAndDelete(id)
+    if (!deletedShippingMethod) {
+      res.next(createHttpError(404, `No shipping method with ID: ${id}`))
+    }
+
+    res.json(deletedShippingMethod)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not add product'))
+  }
+}
+
 const shippingMethodRoutes = express.Router()
 shippingMethodRoutes.get('/', getAllShippingMethods)
 shippingMethodRoutes.get('/:id', getShippingMethodById)
 shippingMethodRoutes.put('/', isAuth, updateShippingMethod)
 shippingMethodRoutes.post('/', isAuth, addShippingMethod)
+shippingMethodRoutes.delete('/:id', isAuth, deleteShippingMethod)
 
 module.exports = shippingMethodRoutes
