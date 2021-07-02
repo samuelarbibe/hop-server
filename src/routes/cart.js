@@ -88,6 +88,27 @@ const clearShippingMethodHandler = async (req, res, next) => {
   }
 }
 
+const setCustomerAddress = async (req, res, next) => {
+  try {
+    const cartId = req.fingerprint.hash
+    const address = req.body.address
+    const houseNumber = Number(req.body.houseNumber)
+
+    const updateQuery = {
+      $set: {
+        'customerDetails.address': address,
+        'customerDetails.houseNumber': houseNumber
+      }
+    }
+    const updatedCart = await Cart.findByIdAndUpdate(cartId, updateQuery)
+    res.json(updatedCart)
+  } catch (error) {
+    if (createHttpError.isHttpError(error)) return next(error)
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not set customer address'))
+  }
+}
+
 const emptyCartHandler = async (req, res, next) => {
   try {
     const cartId = req.fingerprint.hash
@@ -107,6 +128,7 @@ cartRoutes.put('/product/:id', addProductHandler)
 cartRoutes.delete('/product/:id', removeProductHandler)
 cartRoutes.put('/shippingMethod/:id', setShippingMethodHandler)
 cartRoutes.delete('/shippingMethod', clearShippingMethodHandler)
+cartRoutes.put('/address', setCustomerAddress)
 cartRoutes.delete('/', emptyCartHandler)
 
 module.exports = cartRoutes

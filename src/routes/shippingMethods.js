@@ -4,6 +4,16 @@ const { isAuth } = require('../middlewares/authMiddleware')
 const ShippingMethod = require('../models/ShippingMethod')
 const logger = require('../utils/logger')
 
+const getAvailableShippingMethods = async (req, res, next) => {
+  try {
+    const shippingMethods = await ShippingMethod.find({ tempStock: { $gt: 0 } })
+    res.json(shippingMethods)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not load shipping methods'))
+  }
+}
+
 const getAllShippingMethods = async (req, res, next) => {
   try {
     const shippingMethods = await ShippingMethod.find({})
@@ -70,10 +80,12 @@ const deleteShippingMethod = async (req, res, next) => {
 }
 
 const shippingMethodRoutes = express.Router()
-shippingMethodRoutes.get('/', getAllShippingMethods)
 shippingMethodRoutes.get('/:id', getShippingMethodById)
-shippingMethodRoutes.put('/', isAuth, updateShippingMethod)
+shippingMethodRoutes.get('/', getAvailableShippingMethods)
+
 shippingMethodRoutes.post('/', isAuth, addShippingMethod)
+shippingMethodRoutes.put('/', isAuth, updateShippingMethod)
+shippingMethodRoutes.get('/all', isAuth, getAllShippingMethods)
 shippingMethodRoutes.delete('/:id', isAuth, deleteShippingMethod)
 
 module.exports = shippingMethodRoutes

@@ -24,7 +24,7 @@
         "--exit",
         "--colors",
         "--timeout",
-        "10000"
+        "10000000"
       ],
       "env": {
         "NODE_ENV": "test"

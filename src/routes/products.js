@@ -4,6 +4,16 @@ const { isAuth } = require('../middlewares/authMiddleware')
 const Product = require('../models/Product')
 const logger = require('../utils/logger')
 
+const getAvailableProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({ tempStock: { $gt: 0 } })
+    res.json(products)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not load products'))
+  }
+}
+
 const getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.find({})
@@ -96,12 +106,14 @@ const addProductsFromCsv = async (req, res, next) => {
 }
 
 const productRoutes = express.Router()
-productRoutes.get('/', getAllProducts)
-productRoutes.put('/', isAuth, updateProduct)
-productRoutes.post('/', isAuth, addProduct)
-productRoutes.delete('/:id', isAuth, deleteProduct)
 productRoutes.get('/:id', getProductById)
 productRoutes.get('/csv', getProductsAsCsv)
+productRoutes.get('/', getAvailableProducts)
+
+productRoutes.get('/all', getAllProducts)
+productRoutes.post('/', isAuth, addProduct)
+productRoutes.put('/', isAuth, updateProduct)
+productRoutes.delete('/:id', isAuth, deleteProduct)
 productRoutes.post('/csv', isAuth, addProductsFromCsv)
 
 module.exports = productRoutes

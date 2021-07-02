@@ -13,6 +13,11 @@ const cartSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  customerDetails: {
+    _id: false,
+    address: String,
+    houseNumber: Number,
+  }
 })
 
 const Cart = mongoose.model('cart', cartSchema)

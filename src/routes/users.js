@@ -28,7 +28,13 @@ const isLoggedInHandler = (req, res) => {
   res.send({ authenticated: !!req.user })
 }
 
+const logoutHandler = (req, res) => {
+  req.logout()
+  res.send({ authenticated: false })
+}
+
 userRoutes.get('/login', isLoggedInHandler)
 userRoutes.post('/login', loginHandler)
+userRoutes.post('/logout', logoutHandler)
 
 module.exports = userRoutes

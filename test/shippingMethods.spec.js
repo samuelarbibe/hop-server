@@ -8,6 +8,7 @@ const { createServer } = require('../src/server')
 const app = createServer(true)
 
 const shippingMethods = require('./testData/shippingMethods')
+const { login, logout } = require('./utils/users')
 
 describe('Shipping Methods', () => {
   describe('GET /', () => {
@@ -28,9 +29,21 @@ describe('Shipping Methods', () => {
   })
 
   describe('POST /', () => {
-    it('Should add product', async () => {
+    it('Should not allow if not authenticated', async () => {
       const shippingMethodToAdd = shippingMethods[0]
       const res = await request(app)
+        .post('/api/shippingMethods')
+        .send(shippingMethodToAdd)
+
+      expect(res).to.have.status(403)
+    })
+
+    it('Should add shipping method', async () => {
+      const agent = chai.request.agent(app)
+      await login(agent)
+
+      const shippingMethodToAdd = shippingMethods[0]
+      const res = await agent
         .post('/api/shippingMethods')
         .send(shippingMethodToAdd)
 
@@ -39,6 +52,8 @@ describe('Shipping Methods', () => {
       const docs = await ShippingMethod.find({})
       const expected = JSON.parse(JSON.stringify(docs))
       expect(expected).to.include.deep.members([res.body])
+
+      await logout(app)
     })
   })
 })
