@@ -6,7 +6,7 @@ const logger = require('../utils/logger')
 
 const getAvailableProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({ tempStock: { $gt: 0 } })
+    const products = await Product.find({ stock: { $gt: 0 } })
     res.json(products)
   } catch (error) {
     logger.error(error.message)
@@ -106,14 +106,15 @@ const addProductsFromCsv = async (req, res, next) => {
 }
 
 const productRoutes = express.Router()
-productRoutes.get('/:id', getProductById)
-productRoutes.get('/csv', getProductsAsCsv)
-productRoutes.get('/', getAvailableProducts)
 
 productRoutes.get('/all', getAllProducts)
 productRoutes.post('/', isAuth, addProduct)
 productRoutes.put('/', isAuth, updateProduct)
 productRoutes.delete('/:id', isAuth, deleteProduct)
 productRoutes.post('/csv', isAuth, addProductsFromCsv)
+
+productRoutes.get('/:id', getProductById)
+productRoutes.get('/csv', getProductsAsCsv)
+productRoutes.get('/', getAvailableProducts)
 
 module.exports = productRoutes

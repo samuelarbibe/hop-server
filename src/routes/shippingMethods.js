@@ -80,12 +80,12 @@ const deleteShippingMethod = async (req, res, next) => {
 }
 
 const shippingMethodRoutes = express.Router()
-shippingMethodRoutes.get('/:id', getShippingMethodById)
-shippingMethodRoutes.get('/', getAvailableShippingMethods)
-
 shippingMethodRoutes.post('/', isAuth, addShippingMethod)
 shippingMethodRoutes.put('/', isAuth, updateShippingMethod)
 shippingMethodRoutes.get('/all', isAuth, getAllShippingMethods)
 shippingMethodRoutes.delete('/:id', isAuth, deleteShippingMethod)
+
+shippingMethodRoutes.get('/:id', getShippingMethodById)
+shippingMethodRoutes.get('/', getAvailableShippingMethods)
 
 module.exports = shippingMethodRoutes
