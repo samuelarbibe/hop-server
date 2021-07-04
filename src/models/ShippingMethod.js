@@ -1,3 +1,4 @@
+require('mongoose-geojson-schema')
 const mongoose = require('mongoose')
 
 const { Schema } = mongoose
@@ -15,6 +16,7 @@ const ShippingMethodSchema = new Schema({
   from: Date,
   to: Date,
   description: String,
+  area: Schema.Types.MultiPolygon
 })
 
 const ShippingMethod = mongoose.model('shippingMethod', ShippingMethodSchema, 'shippingMethods')

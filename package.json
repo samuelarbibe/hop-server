@@ -30,6 +30,7 @@
     "mocha": "^8.4.0",
     "mongo": "^0.1.0",
     "mongoose": "^5.12.12",
+    "mongoose-geojson-schema": "^2.1.6",
     "mongoose-to-csv": "^0.1.1",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.7",
