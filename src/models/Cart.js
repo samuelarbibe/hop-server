@@ -16,7 +16,12 @@ const cartSchema = new Schema({
   customerDetails: {
     _id: false,
     address: String,
-    houseNumber: Number,
+    houseNumber: {
+      type: Number,
+      min: 0,
+      get: v => Math.round(v),
+      set: v => Math.round(v),
+    },
   }
 })
 

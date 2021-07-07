@@ -92,7 +92,15 @@ const setCustomerAddress = async (req, res, next) => {
   try {
     const cartId = req.fingerprint.hash
     const address = req.body.address
-    const houseNumber = Number(req.body.houseNumber)
+    const houseNumber = +req.body.houseNumber
+
+    if (Number.isNaN(houseNumber) || houseNumber < 0) {
+      return next(createHttpError(400, 'Invalid house number'))
+    }
+
+    if (!address) {
+      return next(createHttpError(400, 'Invalid address'))
+    }
 
     const updateQuery = {
       $set: {

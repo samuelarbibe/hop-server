@@ -185,6 +185,32 @@ describe('Cart', () => {
     })
   })
 
+  describe('PUT /address', () => {
+    it('Should set customer address', async () => {
+      const expectedAddress = {
+        address: 'בן גוריון 7 רעננה',
+        houseNumber: 3,
+      }
+      const res = await request(app).put('/api/cart/address').send(expectedAddress)
+
+      expect(res).to.have.status(200)
+      expect(res.body.items.length).to.equal(0)
+
+      const { body: cart } = await request(app).get('/api/cart')
+      expect(cart.customerDetails).to.deep.equal(expectedAddress)
+    })
+
+    it('Should return error if invalid body', async () => {
+      const invalidAddress = {
+        address: 'בן גוריון 7 רעננה',
+        houseNumber: 'x',
+      }
+      const res = await request(app).put('/api/cart/address', invalidAddress)
+
+      expect(res).to.have.status(400)
+    })
+  })
+
   describe('Stress test', () => {
     context('Products => Cart', () => {
       let insertedProduct
