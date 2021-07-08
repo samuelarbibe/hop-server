@@ -2,6 +2,7 @@ const createHttpError = require('http-errors')
 const logger = require('../utils/logger')
 
 const Cart = require('../models/Cart')
+const Const = require('../models/Const')
 
 const cartMiddleware = async (req, res, next) => {
   try {
@@ -10,7 +11,22 @@ const cartMiddleware = async (req, res, next) => {
     const cart = await Cart.findById(fingerprint)
 
     if (!cart) {
-      await Cart.updateOne({ _id: fingerprint }, { _id: fingerprint, items: [], createdAt: new Date() }, { upsert: 1 })
+      const { value: timeToExpire } = await Const.findById('cart_time_to_expire')
+      if (!timeToExpire) {
+        throw Error('Error! missing cart_time_to_expire const.')
+      }
+
+      const query = { _id: fingerprint }
+      const currentDate = new Date()
+      const cartToInsert = {
+        _id: fingerprint,
+        items: [],
+        createdAt: currentDate,
+        expiresAt: new Date(currentDate.getTime() + 1000 * 60 * timeToExpire)
+      }
+
+      const options = { upsert: 1 }
+      await Cart.updateOne(query, cartToInsert, options)
     }
   } catch (error) {
     logger.error(error.message)

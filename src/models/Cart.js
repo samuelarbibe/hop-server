@@ -13,6 +13,7 @@ const cartSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  expiresAt: Date,
   customerDetails: {
     _id: false,
     address: String,

@@ -10,12 +10,9 @@ const init = async (dbInstance) => {
 
   agenda.define('delete expired carts', async () => {
     try {
-      const currentTime = new Date().getTime()
-      const cartExpireTime = new Date(currentTime - 1000 * 60 * 5)
-
       const query = {
-        createdAt: {
-          '$lt': cartExpireTime
+        expiresAt: {
+          '$lt': new Date()
         }
       }
 
