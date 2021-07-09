@@ -79,42 +79,13 @@ const getProductById = async (req, res, next) => {
   }
 }
 
-const getProductsAsCsv = async (req, res, next) => {
-  try {
-    const query = req.body || {}
-    res.setHeader('content-type', 'text/csv')
-    res.setHeader('Content-Disposition', 'attachmentfilename=products.csv')
-
-    Product.findAndStreamCsv(query).pipe(res)
-  } catch (error) {
-    logger.error(error.message)
-    return next(createHttpError(500, 'Could not get products as csv'))
-  }
-}
-
-const addProductsFromCsv = async (req, res, next) => {
-  try {
-    if (!req.files.products) next(createHttpError(400, 'No File sent'))
-
-    const csvData = req.files.products.data.toString('utf8')
-    const insertedProducts = await Product.insertManyFromCsv(csvData)
-    res.send(insertedProducts)
-  } catch (error) {
-    logger.error(error.message)
-    return next(createHttpError(500, 'Failed to save products from csv'))
-  }
-}
-
 const productRoutes = express.Router()
 
-productRoutes.get('/all', getAllProducts)
+productRoutes.get('/all', isAuth, getAllProducts)
+productRoutes.get('/:id', getProductById)
 productRoutes.post('/', isAuth, addProduct)
+productRoutes.get('/', getAvailableProducts)
 productRoutes.put('/', isAuth, updateProduct)
 productRoutes.delete('/:id', isAuth, deleteProduct)
-productRoutes.post('/csv', isAuth, addProductsFromCsv)
-
-productRoutes.get('/:id', getProductById)
-productRoutes.get('/csv', getProductsAsCsv)
-productRoutes.get('/', getAvailableProducts)
 
 module.exports = productRoutes

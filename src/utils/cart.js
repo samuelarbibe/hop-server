@@ -160,10 +160,30 @@ const clearShippingMethod = async (cartId) => {
   return updatedCart
 }
 
+const setCustomerAddress = async (cartId, { address, houseNumber }) => {
+  if (Number.isNaN(houseNumber) || houseNumber < 0) {
+    throw createHttpError(400, 'Invalid house number')
+  }
+
+  if (!address) {
+    throw createHttpError(400, 'Invalid address')
+  }
+
+  const updateQuery = {
+    $set: {
+      'customerDetails.address': address,
+      'customerDetails.houseNumber': houseNumber
+    }
+  }
+  const updatedCart = await Cart.findByIdAndUpdate(cartId, updateQuery)
+  return updatedCart
+}
+
 module.exports = {
   addItem,
   removeItem,
   emptyCart,
   setShippingMethod,
-  clearShippingMethod
+  clearShippingMethod,
+  setCustomerAddress,
 }

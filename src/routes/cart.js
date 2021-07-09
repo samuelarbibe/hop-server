@@ -4,7 +4,14 @@ const createHttpError = require('http-errors')
 const logger = require('../utils/logger')
 
 const Cart = require('../models/Cart')
-const { addItem, removeItem, emptyCart, setShippingMethod, clearShippingMethod } = require('../utils/cart')
+const {
+  addItem,
+  removeItem,
+  emptyCart,
+  setShippingMethod,
+  clearShippingMethod,
+  setCustomerAddress,
+} = require('../utils/cart')
 const { isAuth } = require('../middlewares/authMiddleware')
 
 const getCartHandler = async (req, res, next) => {
@@ -88,27 +95,13 @@ const clearShippingMethodHandler = async (req, res, next) => {
   }
 }
 
-const setCustomerAddress = async (req, res, next) => {
+const setCustomerAddressHandler = async (req, res, next) => {
   try {
     const cartId = req.fingerprint.hash
     const address = req.body.address
     const houseNumber = +req.body.houseNumber
 
-    if (Number.isNaN(houseNumber) || houseNumber < 0) {
-      return next(createHttpError(400, 'Invalid house number'))
-    }
-
-    if (!address) {
-      return next(createHttpError(400, 'Invalid address'))
-    }
-
-    const updateQuery = {
-      $set: {
-        'customerDetails.address': address,
-        'customerDetails.houseNumber': houseNumber
-      }
-    }
-    const updatedCart = await Cart.findByIdAndUpdate(cartId, updateQuery)
+    const updatedCart = await setCustomerAddress(cartId, { address, houseNumber })
     res.json(updatedCart)
   } catch (error) {
     if (createHttpError.isHttpError(error)) return next(error)
@@ -130,13 +123,17 @@ const emptyCartHandler = async (req, res, next) => {
 }
 
 const cartRoutes = express.Router()
+
 cartRoutes.get('/', getCartHandler)
 cartRoutes.get('/all', isAuth, getAllCartsHandler)
+cartRoutes.delete('/', emptyCartHandler)
+
 cartRoutes.put('/product/:id', addProductHandler)
 cartRoutes.delete('/product/:id', removeProductHandler)
+
 cartRoutes.put('/shippingMethod/:id', setShippingMethodHandler)
 cartRoutes.delete('/shippingMethod', clearShippingMethodHandler)
-cartRoutes.put('/address', setCustomerAddress)
-cartRoutes.delete('/', emptyCartHandler)
+
+cartRoutes.put('/address', setCustomerAddressHandler)
 
 module.exports = cartRoutes

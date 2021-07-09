@@ -72,9 +72,9 @@ const deleteConst = async (req, res, next) => {
 
 const constsRoutes = express.Router()
 
-constsRoutes.get('/', getAllConsts)
 constsRoutes.post('/', addConst)
 constsRoutes.put('/', updateConst)
+constsRoutes.get('/', getAllConsts)
 constsRoutes.delete('/', deleteConst)
 constsRoutes.get('/:id', getConstById)
 
