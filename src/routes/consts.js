@@ -8,7 +8,7 @@ const getConstById = async (req, res, next) => {
     const { id } = req.params
     const result = await Const.findByIdAndUpdate(id)
     if (!result) {
-      res.next(createHttpError(404, `No Const with ID: ${id}`))
+      next(createHttpError(404, `No Const with ID: ${id}`))
     }
     res.json(result)
   } catch (error) {
@@ -35,7 +35,7 @@ const updateConst = async (req, res, next) => {
     const { _id, value } = req.body
     const updatedConst = await Const.findByIdAndUpdate(_id, { value })
     if (!updatedConst) {
-      res.next(createHttpError(404, `No Const with ID: ${_id}`))
+      next(createHttpError(404, `No Const with ID: ${_id}`))
     }
 
     res.json(updatedConst)
@@ -60,7 +60,7 @@ const deleteConst = async (req, res, next) => {
     const { id } = req.params
     const deletedConst = await Const.findByIdAndDelete(id)
     if (!deletedConst) {
-      res.next(createHttpError(404, `No Const with ID: ${id}`))
+      next(createHttpError(404, `No Const with ID: ${id}`))
     }
 
     res.json(deletedConst)

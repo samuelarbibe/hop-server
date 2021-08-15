@@ -58,15 +58,15 @@ const validateAddressForShippingMethod = async (req, res, next) => {
 
     const cart = await Cart.findById(cartId)
     if (!cart) {
-      return res.next(createHttpError(404, `No Cart with ID: ${cartId}`))
+      return next(createHttpError(404, `No Cart with ID: ${cartId}`))
     }
     if (!cart.shippingMethod) {
-      return res.next(createHttpError(404, `Cannot get shipping address if no shipping method is selected: ${cartId}`))
+      return next(createHttpError(404, `Cannot get shipping address if no shipping method is selected: ${cartId}`))
     }
 
     const selectedShippingMethod = await ShippingMethod.findById(cart.shippingMethod)
     if (selectedShippingMethod.type !== 'delivery') {
-      return res.next(createHttpError(404, `Cannot get address for shipping method that is not delivery: ${cart.shippingMethod} in ${cartId}`))
+      return next(createHttpError(404, `Cannot get address for shipping method that is not delivery: ${cart.shippingMethod} in ${cartId}`))
     }
 
     const { lat, lng } = address.geometry.location

@@ -29,7 +29,7 @@ const updateProduct = async (req, res, next) => {
     const { _id, ...productToUpdate } = req.body
     const updatedProduct = await Product.findByIdAndUpdate(_id, productToUpdate)
     if (!updatedProduct) {
-      res.next(createHttpError(404, `No Product with ID: ${_id}`))
+      next(createHttpError(404, `No Product with ID: ${_id}`))
     }
 
     res.json(updatedProduct)
@@ -54,7 +54,7 @@ const deleteProduct = async (req, res, next) => {
     const { id } = req.params
     const deletedProduct = await Product.findByIdAndDelete(id)
     if (!deletedProduct) {
-      res.next(createHttpError(404, `No Product with ID: ${id}`))
+      next(createHttpError(404, `No Product with ID: ${id}`))
     }
 
     res.json(deletedProduct)
@@ -69,7 +69,7 @@ const getProductById = async (req, res, next) => {
     const id = req.params.id
     const product = await Product.findById(id)
     if (!product) {
-      res.next(createHttpError(404, `No Product with ID: ${id}`))
+      next(createHttpError(404, `No Product with ID: ${id}`))
     }
 
     res.json(product)

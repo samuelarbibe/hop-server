@@ -29,7 +29,7 @@ const getShippingMethodById = async (req, res, next) => {
     const id = req.params.id
     const shippingMethod = await ShippingMethod.findById(id)
     if (!shippingMethod) {
-      res.next(createHttpError(404, `No Shipping method with ID: ${id}`))
+      next(createHttpError(404, `No Shipping method with ID: ${id}`))
     }
 
     res.json(shippingMethod)
@@ -44,7 +44,7 @@ const updateShippingMethod = async (req, res, next) => {
     const { _id, ...shippingMethodToUpdate } = req.body
     const updatedShippingMethod = await ShippingMethod.findByIdAndUpdate(_id, shippingMethodToUpdate)
     if (!updatedShippingMethod) {
-      res.next(createHttpError(404, `No Shipping method with ID: ${_id}`))
+      next(createHttpError(404, `No Shipping method with ID: ${_id}`))
     }
 
     res.json(updatedShippingMethod)
@@ -69,7 +69,7 @@ const deleteShippingMethod = async (req, res, next) => {
     const { id } = req.params
     const deletedShippingMethod = await ShippingMethod.findByIdAndDelete(id)
     if (!deletedShippingMethod) {
-      res.next(createHttpError(404, `No shipping method with ID: ${id}`))
+      next(createHttpError(404, `No shipping method with ID: ${id}`))
     }
 
     res.json(deletedShippingMethod)
