@@ -58,6 +58,8 @@ const createPaymentProcess = async (cartForOrder) => {
 
 const createRequestDataForApproveTransaction = (transactionDetails) => {
   const data = new FormData()
+  data.append('pageCode', process.env.MESHULAM_API_PAGE_CODE)
+
   const { customFields, ...rest } = transactionDetails
 
   Object.keys(customFields).forEach((key) => {
@@ -87,7 +89,7 @@ const approveTransaction = async (transactionDetails) => {
 
   if (status !== 1) {
     const { message: errorMessage, id: errorId } = err
-    throw createHttpError(`Could not approve transaction ${requestData.transactionId} from meshulam API because: ${errorMessage} (${errorId})`)
+    throw createHttpError(`Could not approve transaction ${transactionDetails.transactionId} from meshulam API because: ${errorMessage} (${errorId})`)
   }
 
   return data
