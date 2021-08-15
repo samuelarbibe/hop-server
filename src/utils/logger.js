@@ -38,10 +38,6 @@ const options = {
     level: 'debug',
     format: winston.format.combine(format, colorize),
   },
-  allFile: {
-    filename: 'logs/all.log',
-    format,
-  },
   errorFile: {
     filename: 'logs/error.log',
     level: 'error',
@@ -51,7 +47,6 @@ const options = {
 
 const transports = [
   new winston.transports.Console(options.console),
-  new winston.transports.File(options.allFile),
   new winston.transports.File(options.errorFile),
 ]
 

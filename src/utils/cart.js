@@ -4,6 +4,7 @@ const createHttpError = require('http-errors')
 const Cart = require('../models/Cart')
 const Product = require('../models/Product')
 const ShippingMethod = require('../models/ShippingMethod')
+const Order = require('../models/Order')
 
 const addItem = async (cartId, productId, amount) => {
   const cart = await Cart.findById(cartId)
@@ -96,9 +97,34 @@ const emptyCart = async (cartId) => {
   await Promise.all(removePromises)
   const updatedCart = await clearShippingMethod(cartId)
 
+  if (updatedCart.orderId) {
+    await Order.findByIdAndUpdate(updatedCart.orderId, { status: 'cancelled' })
+  }
+
   await Cart.findByIdAndDelete(cartId)
 
   return updatedCart
+}
+
+const approveCart = async (cartId) => {
+  let orderId
+  try {
+    const cart = await Cart.findById(cartId)
+    orderId = cart.orderId
+    const removePromises = cart.items.map(async (item) => {
+      const update = {
+        $inc: { stock: -item.amount }
+      }
+      await Product.findByIdAndUpdate(item.productId, update)
+    })
+
+    await Promise.all(removePromises)
+    await ShippingMethod.findByIdAndUpdate(cart.shippingMethod, { $inc: { stock: -1 } })
+
+    return await Cart.findByIdAndDelete(cartId)
+  } catch (error) {
+    throw Error(`FATAL: Failed to update order status (${orderId ? `order ${orderId}` : `cart ${cartId}`}): ${error.message}`)
+  }
 }
 
 const setShippingMethod = async (cartId, shippingMethodId) => {
@@ -161,29 +187,70 @@ const clearShippingMethod = async (cartId) => {
 }
 
 const setCustomerAddress = async (cartId, { address, houseNumber }) => {
-  if (Number.isNaN(houseNumber) || houseNumber < 0) {
-    throw createHttpError(400, 'Invalid house number')
-  }
-
-  if (!address) {
-    throw createHttpError(400, 'Invalid address')
-  }
-
+  const findQuery = { _id: cartId }
   const updateQuery = {
     $set: {
       'customerDetails.address': address,
       'customerDetails.houseNumber': houseNumber
     }
   }
-  const updatedCart = await Cart.findByIdAndUpdate(cartId, updateQuery)
+  const updatedCart = await Cart.findOneAndUpdate(findQuery, updateQuery, { runValidators: true })
   return updatedCart
+}
+
+const setCustomerDetails = async (cartId, { fullName, email, phoneNumber }) => {
+  const findQuery = { _id: cartId }
+
+  const updateQuery = {
+    $set: {
+      'customerDetails.fullName': fullName,
+      'customerDetails.email': email,
+      'customerDetails.phoneNumber': phoneNumber,
+    }
+  }
+  const updatedCart = await Cart.findOneAndUpdate(findQuery, updateQuery, { runValidators: true })
+  return updatedCart
+}
+
+const getCartForOrder = async (cart, orderId) => {
+  const { items, shippingMethod: shippingMethodId } = cart
+  const products = await Product.find({ _id: { $in: items.map(({ productId }) => ObjectId(productId)) } })
+  const shippingMethod = await ShippingMethod.findById(shippingMethodId).lean()
+
+  if (!products?.length || !shippingMethod) {
+    throw createHttpError(400, 'Could not create order items, invalid cart')
+  }
+
+  const cartForOrder = {
+    ...cart,
+    items: products.map((product) => {
+      const amount = items.find((item) => item.productId === product._id.toString()).amount
+      return {
+        productId: product._id.toString(),
+        productName: product.name,
+        productDescription: product.description,
+        productPrice: product.price,
+        amount,
+      }
+    }),
+    shippingMethod: {
+      ...shippingMethod,
+      _id: shippingMethod._id.toString()
+    },
+    orderId: orderId.toString()
+  }
+
+  return cartForOrder
 }
 
 module.exports = {
   addItem,
   removeItem,
   emptyCart,
+  approveCart,
+  getCartForOrder,
   setShippingMethod,
-  clearShippingMethod,
+  setCustomerDetails,
   setCustomerAddress,
+  clearShippingMethod,
 }

@@ -5,9 +5,12 @@ const { Schema } = mongoose
 
 const ShippingMethodSchema = new Schema({
   name: String,
-  type: String,
-  price: Number,
-  stock: Number,
+  type: {
+    type: String,
+    enum: ['delivery', 'pickup']
+  },
+  price: { type: Number, min: 0 },
+  stock: { type: Number, min: 0 },
   freeAbove: Number,
   tempStock: {
     type: Number,

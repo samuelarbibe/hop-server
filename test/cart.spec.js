@@ -10,6 +10,7 @@ const { createServer } = require('../src/server')
 const app = createServer(true)
 
 const products = require('./testData/products')
+const customerDetails = require('./testData/customerDetails')
 const shippingMethods = require('./testData/shippingMethods')
 
 describe('Cart', () => {
@@ -187,14 +188,10 @@ describe('Cart', () => {
 
   describe('PUT /address', () => {
     it('Should set customer address', async () => {
-      const expectedAddress = {
-        address: 'בן גוריון 7 רעננה',
-        houseNumber: 3,
-      }
+      const expectedAddress = customerDetails.address
       const res = await request(app).put('/api/cart/address').send(expectedAddress)
 
       expect(res).to.have.status(200)
-      expect(res.body.items.length).to.equal(0)
 
       const { body: cart } = await request(app).get('/api/cart')
       expect(cart.customerDetails).to.deep.equal(expectedAddress)
@@ -202,16 +199,39 @@ describe('Cart', () => {
 
     it('Should return error if invalid body', async () => {
       const invalidAddress = {
-        address: 'בן גוריון 7 רעננה',
+        address: 'בן גוריון 45 תל אביב',
         houseNumber: 'x',
       }
-      const res = await request(app).put('/api/cart/address', invalidAddress)
+      const res = await request(app).put('/api/cart/address').send(invalidAddress)
 
-      expect(res).to.have.status(400)
+      expect(res).to.have.status(500)
     })
   })
 
-  describe('Stress test', () => {
+  describe('PUT /customerDetails', () => {
+    it('Should set customer details', async () => {
+      const expectedCustomerDetails = customerDetails.details
+      const res = await request(app).put('/api/cart/customerDetails').send(expectedCustomerDetails)
+
+      expect(res).to.have.status(200)
+
+      const { body: cart } = await request(app).get('/api/cart')
+      expect(cart.customerDetails).to.deep.equal(expectedCustomerDetails)
+    })
+
+    it('Should return error if invalid fullName', async () => {
+      const invalidAddress = {
+        fullName: 123123,
+        email: 'samuel.arbibe@gmail.com',
+        phoneNumber: '0543773812'
+      }
+      const res = await request(app).put('/api/cart/customerDetails').send(invalidAddress)
+
+      expect(res).to.have.status(500)
+    })
+  })
+
+  describe.skip('Stress test', () => {
     context('Products => Cart', () => {
       let insertedProduct
 

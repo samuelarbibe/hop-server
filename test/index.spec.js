@@ -4,6 +4,7 @@ const { connectDb } = require('../src/server')
 const Cart = require('../src/models/Cart')
 const User = require('../src/models/User')
 const Const = require('../src/models/Const')
+const Order = require('../src/models/Order')
 const Product = require('../src/models/Product')
 const ShippingMethod = require('../src/models/ShippingMethod')
 
@@ -21,6 +22,7 @@ beforeEach(async () => {
 afterEach(async () => {
   await User.deleteMany({})
   await Cart.deleteMany({})
+  await Order.deleteMany({})
   await Product.deleteMany({})
   await ShippingMethod.deleteMany({})
 })

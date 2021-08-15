@@ -11,6 +11,7 @@ const {
   setShippingMethod,
   clearShippingMethod,
   setCustomerAddress,
+  setCustomerDetails,
 } = require('../utils/cart')
 const { isAuth } = require('../middlewares/authMiddleware')
 
@@ -110,6 +111,22 @@ const setCustomerAddressHandler = async (req, res, next) => {
   }
 }
 
+const setCustomerDetailsHandler = async (req, res, next) => {
+  try {
+    const cartId = req.fingerprint.hash
+    const fullName = req.body.fullName
+    const email = req.body.email
+    const phoneNumber = req.body.phoneNumber
+
+    const updatedCart = await setCustomerDetails(cartId, { fullName, email, phoneNumber })
+    res.json(updatedCart)
+  } catch (error) {
+    if (createHttpError.isHttpError(error)) return next(error)
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not set customer address'))
+  }
+}
+
 const emptyCartHandler = async (req, res, next) => {
   try {
     const cartId = req.fingerprint.hash
@@ -135,5 +152,6 @@ cartRoutes.put('/shippingMethod/:id', setShippingMethodHandler)
 cartRoutes.delete('/shippingMethod', clearShippingMethodHandler)
 
 cartRoutes.put('/address', setCustomerAddressHandler)
+cartRoutes.put('/customerDetails', setCustomerDetailsHandler)
 
 module.exports = cartRoutes
