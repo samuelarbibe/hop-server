@@ -22,7 +22,7 @@ const createRequstDataFromCart = async (cart) => {
     data.append('cField4', cart.customerDetails.houseNumber)
   }
 
-  let sum = 0
+  let sum = cart.shippingMethod.price
   cart.items.forEach((item, index) => {
     sum += item.productPrice * item.amount
     data.append(`product_data[${index}][quantity]`, item.amount)
