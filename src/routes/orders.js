@@ -78,6 +78,10 @@ const cancelOrder = async (req, res, next) => {
 const updateOrderStatus = async (req, res, next) => {
   try {
     const transactionDetails = req.body
+    Object.keys(transactionDetails).forEach((key) => {
+      logger.info(key + ': ' + transactionDetails[key])
+    })
+
     const { cField1: orderId, cField2: cartId } = transactionDetails.customFields
 
     await approveTransaction(transactionDetails)
