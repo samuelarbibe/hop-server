@@ -84,7 +84,7 @@ const updateOrderStatus = async (req, res, next) => {
     await approveOrder(orderId, transactionDetails)
     await approveCart(cartId)
 
-    await sendMail(orderId)
+    await sendMail(orderId).catch((error) => logger.error(error.message))
 
     res.send()
   } catch (error) {
