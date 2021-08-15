@@ -120,11 +120,13 @@ describe('Orders', () => {
 
       nock(MESHULAM_API_BASE_URL).post('/approveTransaction').reply(200, { status: 1 })
       const body = {
-        customFields: {
-          cField1: updatedCart.orderId,
-          cField2: updatedCart._id
-        },
-        transactionId: 'xxx'
+        data: {
+          customFields: {
+            cField1: updatedCart.orderId,
+            cField2: updatedCart._id
+          },
+          transactionId: 'xxx'
+        }
       }
 
       const res = await request(app)
