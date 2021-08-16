@@ -9,6 +9,8 @@ const createRequstDataFromCart = async (cart) => {
   data.append('pageCode', process.env.MESHULAM_API_PAGE_CODE)
   data.append('userId', process.env.MESHULAM_API_USER_ID)
   data.append('description', 'קניית פסטה')
+  data.append('successUrl', process.env.MESHULAM_SUCCESS_URL)
+  data.append('cancelUrl', process.env.MESHULAM_CANCEL_URL)
   data.append('pageField[fullName]', cart.customerDetails.fullName)
   data.append('pageField[phone]', cart.customerDetails.phoneNumber)
   data.append('pageField[email]', cart.customerDetails.email)

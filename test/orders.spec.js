@@ -62,11 +62,11 @@ describe('Orders', () => {
       expect(order.status).to.equal('pending')
     })
 
-    it('Should return url if already exists in cart', async () => {
+    it('Should return url if already exists in cart and order status is pending', async () => {
       const { body: cart } = await request(app).get('/api/cart')
 
       const paymentProcess = { url: 'url' }
-      const order = await Order.create({ paymentProcess })
+      const order = await Order.create({ paymentProcess, status: 'pending' })
       await Cart.findByIdAndUpdate(cart._id, { $set: { orderId: order._id.toString() } })
 
       const res = await request(app)

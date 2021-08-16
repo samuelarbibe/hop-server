@@ -20,7 +20,9 @@ const createOrder = async (req, res, next) => {
 
     if (cart.orderId) {
       const order = await Order.findById(cart.orderId)
-      return res.send({ url: order.paymentProcess.url })
+      if (order.status === 'pending') {
+        return res.send({ url: order.paymentProcess.url })
+      }
     }
 
     const orderId = new ObjectId()
@@ -81,8 +83,6 @@ const updateOrderStatus = async (req, res, next) => {
 
   try {
     await approveTransaction(transactionDetails)
-
-    res.send()
   } catch (error) {
     logger.error(error.message)
     return next(createHttpError(500, `Could not update transaction status ${error.message}`))
@@ -95,6 +95,8 @@ const updateOrderStatus = async (req, res, next) => {
   } catch (error) {
     logger.error(error.message)
   }
+
+  res.send()
 }
 
 const ordersRoutes = express.Router()
