@@ -62,6 +62,9 @@ const getTransporter = async () => {
 const sendMail = async (orderId) => {
   try {
     const order = await Order.findById(orderId).lean()
+    if (order.status !== 'approved') {
+      throw Error('Order status is no approved')
+    }
 
     const transporter = await getTransporter()
     const message = getMessage(order)

@@ -7,6 +7,8 @@ const logger = require('../utils/logger')
 const Cart = require('../models/Cart')
 const Order = require('../models/Order')
 
+const { isAuth } = require('../middlewares/authMiddleware')
+
 const { sendMail } = require('../utils/mail')
 const { approveCart, getCartForOrder } = require('../utils/cart')
 const { approveTransaction, createPaymentProcess, approveOrder } = require('../utils/orders')
@@ -99,10 +101,51 @@ const updateOrderStatus = async (req, res, next) => {
   res.send()
 }
 
+const resendEmail = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    await sendMail(id)
+    res.send()
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not resend email'))
+  }
+}
+
+const getAllOrders = async (req, res, next) => {
+  try {
+    const status = req.query.status
+    const query = { ...(status && { status }) }
+    const orders = await Order.find(query)
+    res.send(orders)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not resend email'))
+  }
+}
+
+const getOrderById = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const order = await Order.findById(id)
+    if (!order) {
+      return next(createHttpError(404, `No Order with ID: ${id}`))
+    }
+    res.send(order)
+  } catch (error) {
+    logger.error(error.message)
+    return next(createHttpError(500, 'Could not get order by Id'))
+  }
+}
+
 const ordersRoutes = express.Router()
 
 ordersRoutes.get('/createOrder', createOrder)
 ordersRoutes.delete('/cancelOrder', cancelOrder)
 ordersRoutes.post('/updateStatus', updateOrderStatus)
+
+ordersRoutes.get('/all', isAuth, getAllOrders)
+ordersRoutes.post('/:id/resendEmail', isAuth, resendEmail)
+ordersRoutes.get('/:id', isAuth, getOrderById)
 
 module.exports = ordersRoutes
