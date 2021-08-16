@@ -26,6 +26,7 @@
     "express-queue": "0.0.12",
     "express-session": "^1.17.2",
     "form-data": "^4.0.0",
+    "googleapis": "^84.0.0",
     "http-errors": "^1.8.0",
     "joi": "^17.4.0",
     "mocha": "^8.4.0",

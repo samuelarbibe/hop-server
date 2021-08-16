@@ -76,20 +76,24 @@ const cancelOrder = async (req, res, next) => {
 }
 
 const updateOrderStatus = async (req, res, next) => {
+  const { data: transactionDetails } = req.body
+  const { cField1: orderId, cField2: cartId } = transactionDetails.customFields
+
   try {
-    const { data: transactionDetails } = req.body
-    const { cField1: orderId, cField2: cartId } = transactionDetails.customFields
-
     await approveTransaction(transactionDetails)
-    await approveOrder(orderId, transactionDetails)
-    await approveCart(cartId)
-
-    await sendMail(orderId).catch((error) => logger.error(error.message))
 
     res.send()
   } catch (error) {
     logger.error(error.message)
     return next(createHttpError(500, `Could not update transaction status ${error.message}`))
+  }
+
+  try {
+    await approveOrder(orderId, transactionDetails)
+    await approveCart(cartId)
+    await sendMail(orderId)
+  } catch (error) {
+    logger.error(error.message)
   }
 }
 

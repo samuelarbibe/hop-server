@@ -1,5 +1,8 @@
 const moment = require('moment')
 const nodemailer = require('nodemailer')
+const { google } = require('googleapis')
+const OAuth2 = google.auth.OAuth2
+
 const Order = require('../models/Order')
 
 const getMessage = (order) => {
@@ -17,25 +20,55 @@ const getMessage = (order) => {
   return message
 }
 
-const getTransporter = () => nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  }
-})
+const getTransporter = async () => {
+  const oauth2Client = new OAuth2(
+    process.env.EMAIL_CLIENT_ID,
+    process.env.EMAIL_CLIENT_SECRET,
+    'https://developers.google.com/oauthplayground'
+  )
+
+  oauth2Client.setCredentials({
+    refresh_token: process.env.EMAIL_REFRESH_TOKEN
+  })
+
+  const accessToken = await new Promise((resolve, reject) => {
+    oauth2Client.getAccessToken((err, token) => {
+      if (err) {
+        reject()
+      }
+      resolve(token)
+    })
+  })
+
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      type: 'OAuth2',
+      user: process.env.EMAIL_USER,
+      accessToken,
+      clientId: process.env.EMAIL_CLIENT_ID,
+      clientSecret: process.env.EMAIL_CLIENT_SECRET,
+      refreshToken: process.env.EMAIL_REFRESH_TOKEN
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  })
+
+  return transporter
+}
 
 
 const sendMail = async (orderId) => {
   try {
     const order = await Order.findById(orderId).lean()
 
-    const transporter = getTransporter()
+    const transporter = await getTransporter()
     const message = getMessage(order)
 
     return await transporter.sendMail(message)
   } catch (error) {
-    throw Error(`FATAL: Could not send confirmation mail for order ${orderId}: ${error.message}`)
+    throw Error(`Error: Could not send confirmation mail for order ${orderId}: ${error.message}`)
   }
 }
 
