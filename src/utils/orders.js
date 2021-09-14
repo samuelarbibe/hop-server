@@ -1,4 +1,4 @@
-const fetch = require('node-fetch')
+const axios = require('axios')
 const FormData = require('form-data')
 const createHttpError = require('http-errors')
 
@@ -41,14 +41,14 @@ const createPaymentProcess = async (cartForOrder) => {
   const requestData = await createRequstDataFromCart(cartForOrder)
   const requestUrl = `${process.env.MESHULAM_API_BASE_URL}/createPaymentProcess`
 
-  const requestOptions = {
-    method: 'POST',
-    body: requestData,
-    redirect: 'follow',
-    mode: 'no-cors'
+  const config = {
+    method: 'post',
+    url: requestUrl,
+    headers: requestData.getHeaders(),
+    data: requestData
   }
 
-  const { status, data, err } = await fetch(requestUrl, requestOptions).then(response => response.json())
+  const { status, data, err } = await axios(config).then((response) => response.data)
 
   if (status !== 1) {
     const { message: errorMessage, id: errorId } = err
@@ -80,14 +80,14 @@ const approveTransaction = async (transactionDetails) => {
   const requestData = createRequestDataForApproveTransaction(transactionDetails)
   const requestUrl = `${process.env.MESHULAM_API_BASE_URL}/approveTransaction`
 
-  const requestOptions = {
-    method: 'POST',
-    body: requestData,
-    redirect: 'follow',
-    mode: 'no-cors'
+  const config = {
+    method: 'post',
+    url: requestUrl,
+    headers: requestData.getHeaders(),
+    data: requestData
   }
 
-  const { status, data, err } = await fetch(requestUrl, requestOptions).then(response => response.json())
+  const { status, data, err } = await axios(config).then((response) => response.data)
 
   if (status !== 1) {
     const { message: errorMessage, id: errorId } = err
