@@ -1,8 +1,8 @@
-const axios = require('axios')
 const FormData = require('form-data')
 const createHttpError = require('http-errors')
 
 const Order = require('../models/Order')
+const meshulamRequest = require('./meshulamRequest')
 
 const createRequstDataFromCart = async (cart) => {
   const data = new FormData()
@@ -41,14 +41,7 @@ const createPaymentProcess = async (cartForOrder) => {
   const requestData = await createRequstDataFromCart(cartForOrder)
   const requestUrl = `${process.env.MESHULAM_API_BASE_URL}/createPaymentProcess`
 
-  const config = {
-    method: 'post',
-    url: requestUrl,
-    headers: requestData.getHeaders(),
-    data: requestData
-  }
-
-  const { status, data, err } = await axios(config).then((response) => response.data)
+  const { status, data, err } = await meshulamRequest(requestUrl, requestData)
 
   if (status !== 1) {
     const { message: errorMessage, id: errorId } = err
@@ -80,14 +73,7 @@ const approveTransaction = async (transactionDetails) => {
   const requestData = createRequestDataForApproveTransaction(transactionDetails)
   const requestUrl = `${process.env.MESHULAM_API_BASE_URL}/approveTransaction`
 
-  const config = {
-    method: 'post',
-    url: requestUrl,
-    headers: requestData.getHeaders(),
-    data: requestData
-  }
-
-  const { status, data, err } = await axios(config).then((response) => response.data)
+  const { status, data, err } = await meshulamRequest(requestUrl, requestData)
 
   if (status !== 1) {
     const { message: errorMessage, id: errorId } = err
