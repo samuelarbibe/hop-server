@@ -136,7 +136,7 @@ const getEmailHtml = (order) => `
     <tr>
       <td>${order.cart.shippingMethod.name}</td>
       <td>1</td>
-      <td>${order.cart.shippingMethod.price} ₪ </א>
+      <td>${order.cart.shippingMethod.price} ₪ </td>
     </tr>
     <tr>
       <td></td>

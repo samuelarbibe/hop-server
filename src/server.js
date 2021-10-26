@@ -1,14 +1,14 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const fileUpload = require('express-fileupload')
 
 const logger = require('./utils/logger')
 const { init: initAgenda } = require('./utils/agenda')
+
 const errorHandler = require('./middlewares/errorHandler')
 const cartMiddleware = require('./middlewares/cartMiddleware')
 const morganMiddleware = require('./middlewares/morganMiddleware')
-const fingerprintMiddleware = require('./middlewares/fingerprintMiddleware')
 const passportMiddleware = require('./middlewares/passportMiddleware')
+const fingerprintMiddleware = require('./middlewares/fingerprintMiddleware')
 
 const routes = require('./routes/index')
 
@@ -26,7 +26,6 @@ const createServer = () => {
 
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
-  app.use(fileUpload())
 
   if (process.env.NODE_ENV !== 'test') app.use(morganMiddleware)
   app.use(fingerprintMiddleware)
